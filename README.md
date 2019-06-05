@@ -23,4 +23,4 @@ The SERVICE PUBLIC Team
 
 ## License
 
-Lesson code is [not] licensed under [The Unlicence](COPYING) for the moment.
+Lesson code is [not] licensed under The Unlicence for the moment.
