@@ -76,6 +76,7 @@ int main() try {
 
 	// Game state
 	bool is_running = false; // whether the character is currently running
+	int direction = 0; // whether the character is currently running
 	int run_phase = -1;      // run animation phase
 	float position = 0.0;    // player position
 
@@ -99,21 +100,32 @@ int main() try {
 				return 0;
 			} else if (event.type == SDL_KEYDOWN) {
 				switch (event.key.keysym.sym) {
-				case SDLK_ESCAPE: case SDLK_q:
-					return 0;
-				case SDLK_RIGHT: is_running = true; break;
+					case SDLK_ESCAPE:
+					case SDLK_q:
+						return 0;
+					case SDLK_RIGHT:
+						is_running = true;
+						direction = 6;
+						break;
+					case SDLK_LEFT:
+						is_running = true;
+						direction = 4;
+						break;
 				}
 			} else if (event.type == SDL_KEYUP) {
 				switch (event.key.keysym.sym) {
-				case SDLK_RIGHT: is_running = false; break;
+					case SDLK_RIGHT:
+					case SDLK_LEFT:
+						is_running = false;
+						break;
 				}
 			}
 		}
 
 		// Update game state for this frame:
-		// if character is runnung, move it to the right
+		// if character is runnung, move it in the right direction
 		if (is_running) {
-			position += frame_delta * 0.2;
+			position += frame_delta * 0.2 * (direction == 4) ? -1 : 1;
 			run_phase = (frame_ticks / 100) % 8;
 		} else {
 			run_phase = 0;
@@ -122,7 +134,9 @@ int main() try {
 		// If player passes past the right side of the window, wrap him
 		// to the left side
 		if (position > renderer.GetOutputWidth())
-			position = -50;
+			position = 0;
+		if (position < 0)
+			position = renderer.GetOutputWidth()-50;
 
 		int vcenter = renderer.GetOutputHeight() / 2; // Y coordinate of window center
 
