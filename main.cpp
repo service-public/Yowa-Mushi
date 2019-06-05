@@ -152,11 +152,18 @@ int main() try {
 
 		// Pick sprite from sprite atlas based on whether
 		// player is running and run animation phase
-		int src_x = 8, src_y = 11; // by default, standing sprite
+		int src_x = 8, src_y = 11; // by default, standing sprite turned right
+		if (direction == 4) // if turned left
+			src_x = 59;
+
 		if (is_running) {
 			// one of 8 run animation sprites
 			src_x = 8 + 51 * run_phase;
-			src_y = 67;
+
+			if (direction == 6)
+				src_y = 67;
+			else if (direction == 4)
+				src_y = 123;
 		}
 
 		// Draw player sprite
