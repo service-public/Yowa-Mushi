@@ -1,22 +1,3 @@
-//
-// SDL2pp tutorial
-//
-// Written in 2015 by Dmitry Marakasiv <amdmi3@amdmi3.ru>
-//
-// To the extent possible under law, the author(s) have dedicated all copyright
-// and related and neighboring rights to this software to the public domain
-// worldwide. This software is distributed without any warranty.
-//
-// You should have received a copy of the CC0 Public Domain Dedication along with
-// this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
-//
-
-//
-// Lesson 07:
-//
-// - Text rendering
-//
-
 #include <iostream>
 #include <exception>
 #include <algorithm>
@@ -30,6 +11,11 @@ int main() try {
 	// Initialize SDL library
 	SDL sdl(SDL_INIT_VIDEO);
 
+	if((SDL_INIT_VIDEO) == -1)
+	{
+		fprintf(stderr, "Erreur d'initialisaton de la SDL : %s\n", SDL_GetError() );
+		exit(EXIT_FAILURE);
+	}
 	// Initialize SDL_ttf library
 	SDLTTF ttf;
 
@@ -76,13 +62,19 @@ int main() try {
 
 	// Game state
 	bool is_running = false; // whether the character is currently running
+	bool is_shooting[10] = {false};
+	int bullet = 0;
 	int direction = 0; // whether the character is currently running
 	int run_phase = -1;      // run animation phase
 	float position = 0.0;    // player position
+	float bullet_position[10] = {0.0};
+	int bullet_x, bullet_y;
+	int bullet_direction[10] = {6};
+	int cpt = 0;
 
 	unsigned int prev_ticks = SDL_GetTicks();
 	// Main loop
-	while (1) {
+	while (1) { //************************************************************
 		// Timing: calculate difference between this and previous frame
 		// in milliseconds
 		unsigned int frame_ticks = SDL_GetTicks();
@@ -111,6 +103,17 @@ int main() try {
 						is_running = true;
 						direction = 4;
 						break;
+					case SDLK_f:
+						for (size_t i = 0; i <= cpt; i++) {
+							if (is_shooting[i]==false)
+								is_shooting[i] = true;
+								if(direction == 4)
+									bullet_direction[i] = 4;
+								if (direction == 6)
+									bullet_direction[i] = 6;
+							if(is_shooting[i]==true)
+							cpt++;
+						}
 				}
 			} else if (event.type == SDL_KEYUP) {
 				switch (event.key.keysym.sym) {
@@ -130,6 +133,20 @@ int main() try {
 		} else {
 			run_phase = 0;
 		}
+		for (size_t i = 0; i <= cpt ; i++) {
+			if(is_shooting[i]) {
+				bullet_position[i] += frame_delta * 0.6 * (bullet_direction[i] == 4) ? -1 : 1;
+				if (bullet_position[i] > renderer.GetOutputWidth()) {
+					is_shooting[i] = false;
+					cpt --;
+				}
+				if (bullet_position[i] < -50) {
+					is_shooting[i] = false;
+					cpt --;
+				}
+			}
+		}
+
 
 		// If player passes past the right side of the window, wrap him
 		// to the left side
@@ -166,6 +183,12 @@ int main() try {
 				src_y = 123;
 		}
 
+		for (size_t i = 0; i <= cpt; i++) {
+			if (is_shooting[i]) {
+				 bullet_x = 180 , bullet_y = 245;
+			}
+		}
+
 		// Draw player sprite
 		sprites.SetAlphaMod(255); // sprite is fully opaque
 		renderer.Copy(
@@ -173,6 +196,18 @@ int main() try {
 				Rect(src_x, src_y, 50, 50),
 				Rect((int)position, vcenter - 50, 50, 50)
 			);
+
+			for (size_t i = 0; i <= cpt; i++) {
+				if(is_shooting[i]) {
+					sprites.SetAlphaMod(255); // sprite is fully opaque
+					renderer.Copy(
+							sprites,
+							Rect(bullet_x, bullet_y, 20, 20),
+							Rect((int)bullet_position[i] +10, vcenter - 45, 50, 50)
+						);
+					}
+			}
+
 
 		// Draw the same sprite, below the first one, 50% transparent and
 		// vertically flipped. It'll look like reflection in the mirror
@@ -191,23 +226,28 @@ int main() try {
 			"Position: "
 			+ std::to_string((int)position)
 			+ ", running: "
-			+ (is_running ? "true" : "false");
+			+ (is_running ? "true" : "false")
+			+ ", shooting: "
+			+ (is_shooting[0] ? "true" : "false")
+			+ ", check: "
+			+ std::to_string((int)bullet_position[0])
+			+ ", cpt: "
+			+ std::to_string((int)cpt);
 
 		// Render the text into new texture. Note that SDL_ttf render
 		// text into Surface, which is converted into texture on the fly
 		Texture text_sprite(
-				renderer,
-				font.RenderText_Blended(text, SDL_Color{255, 255, 255, 255})
-			);
+			renderer,
+			font.RenderText_Blended(text, SDL_Color{255, 255, 255, 255})
+		);
 
 		// Copy texture into top-left corner of the window
 		renderer.Copy(text_sprite, NullOpt, Rect(0, 0, text_sprite.GetWidth(), text_sprite.GetHeight()));
-
 		// Show rendered frame
 		renderer.Present();
 
 		// Frame limiter: sleep for a little bit to not eat 100% of CPU
-		SDL_Delay(1);
+		SDL_Delay(1); //************************************************************
 	}
 
 	// Here all resources are automatically released and libraries deinitialized
@@ -215,5 +255,6 @@ int main() try {
 } catch (std::exception& e) {
 	// If case of error, print it and exit with error
 	std::cerr << e.what() << std::endl;
-	return 1;
+
+	return EXIT_SUCCESS;
 }
