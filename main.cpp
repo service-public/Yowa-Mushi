@@ -7,7 +7,8 @@
 
 using namespace SDL2pp;
 
-int main() try {
+int main() try
+{
 	// Initialize SDL library
 	SDL sdl(SDL_INIT_VIDEO);
 
@@ -64,13 +65,13 @@ int main() try {
 	bool is_running = false; // whether the character is currently running
 	bool is_shooting[10] = {false};
 	int bullet = 0;
+	int cpt = 0;
 	int direction = 0; // whether the character is currently running
 	int run_phase = -1;      // run animation phase
 	float position = 0.0;    // player position
 	float bullet_position[10] = {0.0};
 	int bullet_x, bullet_y;
 	int bullet_direction[10] = {6};
-	int cpt = 0;
 
 	unsigned int prev_ticks = SDL_GetTicks();
 	// Main loop
@@ -104,15 +105,21 @@ int main() try {
 						direction = 4;
 						break;
 					case SDLK_f:
-						for (size_t i = 0; i <= cpt; i++) {
+						for (size_t i = 0; i <= bullet; i++) {
 							if (is_shooting[i]==false)
+							{
 								is_shooting[i] = true;
+								bullet_position[i] = position;
+								cpt ++;
 								if(direction == 4)
+								{
 									bullet_direction[i] = 4;
+								}
 								if (direction == 6)
+								{
 									bullet_direction[i] = 6;
-							if(is_shooting[i]==true)
-							cpt++;
+								}
+							}
 						}
 				}
 			} else if (event.type == SDL_KEYUP) {
@@ -125,28 +132,36 @@ int main() try {
 			}
 		}
 
+		bullet = cpt;
+
 		// Update game state for this frame:
 		// if character is runnung, move it in the right direction
-		if (is_running) {
+		if (is_running)
+		{
 			position += frame_delta * 0.2 * (direction == 4) ? -1 : 1;
 			run_phase = (frame_ticks / 100) % 8;
 		} else {
 			run_phase = 0;
 		}
-		for (size_t i = 0; i <= cpt ; i++) {
-			if(is_shooting[i]) {
+		for (size_t i = 0; i <= bullet ; i++)
+		{
+			if(is_shooting[i])
+			{
 				bullet_position[i] += frame_delta * 0.6 * (bullet_direction[i] == 4) ? -1 : 1;
-				if (bullet_position[i] > renderer.GetOutputWidth()) {
+				if (bullet_position[i] > renderer.GetOutputWidth())
+				{
 					is_shooting[i] = false;
 					cpt --;
 				}
-				if (bullet_position[i] < -50) {
+				if (bullet_position[i] < -50)
+				{
 					is_shooting[i] = false;
 					cpt --;
 				}
 			}
 		}
 
+		bullet = cpt;
 
 		// If player passes past the right side of the window, wrap him
 		// to the left side
@@ -173,7 +188,8 @@ int main() try {
 		if (direction == 4) // if turned left
 			src_x = 59;
 
-		if (is_running) {
+		if (is_running)
+		{
 			// one of 8 run animation sprites
 			src_x = 8 + 51 * run_phase;
 
@@ -183,8 +199,10 @@ int main() try {
 				src_y = 123;
 		}
 
-		for (size_t i = 0; i <= cpt; i++) {
-			if (is_shooting[i]) {
+		for (size_t i = 0; i <= bullet; i++)
+		{
+			if (is_shooting[i])
+			{
 				 bullet_x = 180 , bullet_y = 245;
 			}
 		}
@@ -197,7 +215,8 @@ int main() try {
 				Rect((int)position, vcenter - 50, 50, 50)
 			);
 
-			for (size_t i = 0; i <= cpt; i++) {
+			for (size_t i = 0; i <= bullet; i++)
+			{
 				if(is_shooting[i]) {
 					sprites.SetAlphaMod(255); // sprite is fully opaque
 					renderer.Copy(
@@ -231,8 +250,8 @@ int main() try {
 			+ (is_shooting[0] ? "true" : "false")
 			+ ", check: "
 			+ std::to_string((int)bullet_position[0])
-			+ ", cpt: "
-			+ std::to_string((int)cpt);
+			+ ", bullet: "
+			+ std::to_string((int)bullet);
 
 		// Render the text into new texture. Note that SDL_ttf render
 		// text into Surface, which is converted into texture on the fly
@@ -252,7 +271,8 @@ int main() try {
 
 	// Here all resources are automatically released and libraries deinitialized
 	return 0;
-} catch (std::exception& e) {
+} catch (std::exception& e)
+{
 	// If case of error, print it and exit with error
 	std::cerr << e.what() << std::endl;
 
