@@ -7,15 +7,15 @@ The greatest 2D RPG-Adventure Game of the century
 
 ## Building
 
-To build executables from these lessons, you need **cmake**, **SDL2**,
+To build the game, you need **cmake**, **SDL2**,
 **SDL2_image**, **SDL2_ttf** and **SDL2_mixer** libraries and corresponding development
 files.
 
-To build the tutorial, run
+Now you can run :
 
     cmake . && make
 
-which will produce a set of binaries: lesson00 .. lesson07.
+which will produce the executable.
 
 ## Authors
 
