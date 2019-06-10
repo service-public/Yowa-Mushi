@@ -7,33 +7,6 @@
 
 using namespace SDL2pp;
 
-class Action
-{
-	int sptite_x;
-	int sprite_y;
-
-	int direction;
-	bool is;
-	int frame;
-
-	float position_x;
-	float position_y;
-
-	int phase_x;
-	int phase_y;
-
-	void phase ()
-	{
-
-	}
-
-	void position()
-	{
-
-	}
-
-};
-
 int main() try
 {
 	// Initialize SDL library
@@ -186,7 +159,7 @@ int main() try
 	// Enable alpha blending for the sprites
 	sprites_spell_8.SetBlendMode(SDL_BLENDMODE_BLEND);
 
-	Texture sprites_projectil (renderer, Surface(DATA_PATH "/rogue like character/rogue like attack.png")
+	Texture sprites_projectil (renderer, Surface(DATA_PATH "/M484SpaceSoldier.png")
 			.SetColorKey(true, 0));
 	// Enable alpha blending for the sprites
 	sprites_projectil.SetBlendMode(SDL_BLENDMODE_BLEND);
@@ -196,8 +169,6 @@ int main() try
 	//***********************************************************************************
 
 	// Game state
-	Action idle, run, spell;
-
 	bool is_running = false; // whether the character is currently running
 	int direction = 0; // whether the character is currently running
 	int run_phase_x = -1;// run animation phase
@@ -212,7 +183,7 @@ int main() try
 	int bullet_direction[100] = {6};
 	float bullet_position_x[100] = {0.0};
 	float bullet_position_y[100] = {0.0};
-	int bullet_x, bullet_y;
+	int bullet_x = 150, bullet_y = 270;
 
 	bool is_idle = true;
 	int idle_phase = -1;
@@ -222,7 +193,6 @@ int main() try
 	int spell_direction = 0;
 	int spell_phase = -1;
 	int spell_x = 10 , spell_y = 10;
-
 
 	unsigned int prev_ticks = SDL_GetTicks();
 	//***********************************************************************************
@@ -287,6 +257,7 @@ int main() try
 						{
 							spell_direction = 6;
 						}
+						break;
 					case SDLK_f:
 						for (size_t i = 0; i <= bullet; i++) {
 							if (is_shooting[i]==false)
@@ -314,6 +285,7 @@ int main() try
 							}
 						}
 				}
+				break;
 			} else if (event.type == SDL_KEYUP) {
 				switch (event.key.keysym.sym) {
 					case SDLK_RIGHT:
@@ -333,6 +305,7 @@ int main() try
 						is_idle = true;
 						break;
 					case SDLK_r:
+						is_running = false;
 						is_spell = false;
 						is_idle = true;
 						break;
@@ -381,9 +354,9 @@ int main() try
 		{
 			if(is_shooting[i])
 			{
-				if(direction == 6 || direction == 4)
+				if(bullet_direction[i] == 6 || bullet_direction[i] == 4)
 				{
-					bullet_position_x[i] += frame_delta * 0.6 * (bullet_direction[i] == 2) ? -1 : 1;
+					bullet_position_x[i] += frame_delta * 0.6 * (bullet_direction[i] == 4) ? -1 : 1;
 					if (bullet_position_x[i] > renderer.GetOutputWidth())
 					{
 						is_shooting[i] = false;
@@ -395,7 +368,7 @@ int main() try
 						cpt --;
 					}
 				}
-				if(direction == 8 || direction == 2)
+				if(bullet_direction[i] == 8 || bullet_direction[i] == 2)
 				{
 					bullet_position_y[i] += frame_delta * 0.6 * (bullet_direction[i] == 8) ? -1 : 1;
 					if (bullet_position_y[i] > renderer.GetOutputHeight())
@@ -403,7 +376,7 @@ int main() try
 						is_shooting[i] = false;
 						cpt --;
 					}
-					if (bullet_position_x[i] < 0)
+					if (bullet_position_y[i] < 0)
 					{
 						is_shooting[i] = false;
 						cpt --;
@@ -428,7 +401,6 @@ int main() try
 		//***********************************************************************************
 		// Clear screen
 		renderer.Clear();
-
 		if(is_idle)
 		{
 			switch (idle_phase) {
@@ -735,7 +707,7 @@ int main() try
 					sprites_projectil.SetAlphaMod(255); // sprite is fully opaque
 					renderer.Copy(
 							sprites_projectil,
-							Rect(bullet_x, bullet_y, 20, 20),
+							Rect(bullet_x, bullet_y, 50, 50),
 							Rect((int)bullet_position_x[i], bullet_position_y[i], 50, 50)
 						);
 					}
